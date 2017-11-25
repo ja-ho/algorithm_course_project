@@ -1,10 +1,13 @@
 #include <stdio.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
 #include "my_types.h"
 
+bool is_less(int a, int b);
+void q_swap(ELEMENT *A, ELEMENT *B);
+void compare_swap(ELEMENT *A, ELEMENT *B);
 int partition(ELEMENT data[], int left, int right);
-void swap(ELEMENT list[], int A, int B, ELEMENT *temp);
+
 
 int QUICK_SORT(ELEMENT data[], int left, int right) {
 	// must return 1 if the function finishes normally or return 0 otherwise
@@ -20,40 +23,38 @@ int QUICK_SORT(ELEMENT data[], int left, int right) {
 
 int partition(ELEMENT data[], int left, int right)
 {
-	int i, pivot;
-	int mid, median;
-	ELEMENT *temp;
-	temp = (ELEMENT *)malloc(sizeof(ELEMENT));
-	mid = (left + right) / 2;
-    //left, right, mid를 비교해서 median 값을 pivot으로 partition
-	if (ELEMENT_KEY(data + left) <= ELEMENT_KEY(data + mid) &&
-		ELEMENT_KEY(data + mid) <= ELEMENT_KEY(data + right))
-		median = ELEMENT_KEY(data + mid);
-	else if (ELEMENT_KEY(data + left) <= ELEMENT_KEY(data + right) &&
-		ELEMENT_KEY(data + right) <= ELEMENT_KEY(data + mid))
-		median = ELEMENT_KEY(data + right);
-	else median = ELEMENT_KEY(data + left);
-
-	swap(data, right, median, temp);
-
-	pivot = left;
-
-	for (i = left; i < right; i++) {
-		if (ELEMENT_KEY(data + i) < ELEMENT_KEY(data + right)) {
-			swap(data, i, pivot, temp);
-			pivot++;
+	int i = left - 1;
+	int j = right;
+	ELEMENT temp;
+	memcpy(&temp, data + right, sizeof(ELEMENT));
+	for (;;) {
+		while (is_less(ELEMENT_KEY(data + (++i)), ELEMENT_KEY(&temp)));
+		while (is_less(ELEMENT_KEY(&temp), ELEMENT_KEY(data + (--j)))) {
+			if (j == left) break;
 		}
+		if (i >= j) break;
+		q_swap(data + i, data + j);
 	}
-	swap(data, right, pivot, temp);
-	free(temp);
-	return pivot;
+	q_swap(data + i, data + right);
+	return i;
 }
 
-/*
-void swap(ELEMENT list[], int A, int B, ELEMENT *temp)
+void q_swap(ELEMENT *A, ELEMENT *B)
 {
-	memcpy(temp, list + A, sizeof(ELEMENT));
-	memcpy(list + A, list + B, sizeof(ELEMENT));
-	memcpy(list + B, temp, sizeof(ELEMENT));
+	ELEMENT temp;
+	memcpy(&temp, A, sizeof(ELEMENT));
+	memcpy(A, B, sizeof(ELEMENT));
+	memcpy(B, &temp, sizeof(ELEMENT));
 }
-*/
+
+void compare_swap(ELEMENT *A, ELEMENT *B)
+{
+	if (is_less(ELEMENT_KEY(B), ELEMENT_KEY(A))) {
+		q_swap(A, B);
+	}
+}
+
+bool is_less(int a, int b)
+{
+	return (a < b);
+}
